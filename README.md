@@ -2,15 +2,6 @@
 
 Krita Spine Export is a Krita Python plugin that exports document layers as PNG attachments plus Spine JSON, modeled after Esoteric Software's `PhotoshopToSpine.jsx` workflow.
 
-## Install
-
-Copy or symlink this folder into Krita's Python plugin folder, then enable **Krita Spine Export** in **Settings > Configure Krita > Python Plugin Manager** and restart Krita.
-
-The plugin entry point is:
-
-- `krita_spine.desktop`
-- `krita_spine/__init__.py`
-
 ## Usage
 
 Open a Krita document and run **Tools > Scripts > Export to Spine...**. Choose the JSON path, image output folder, scale, padding, and export options, then press **Export**.
