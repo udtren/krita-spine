@@ -549,11 +549,7 @@ class SpineExporter:
         return image.save(filename, "PNG")
 
     def _write_template_png(self):
-        base = (
-            self.settings.images_dir
-            if self.settings.images_dir
-            else os.path.dirname(self.settings.json_path)
-        )
+        base = os.path.dirname(self.settings.json_path)
         os.makedirs(base, exist_ok=True)
         filename = os.path.join(base, "template.png")
         if not self.document.exportImage(filename, self._png_config()):
