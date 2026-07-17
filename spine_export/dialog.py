@@ -126,7 +126,7 @@ class SpineExportDialog(QDialog):
 
     def _export(self):
         try:
-            name = active_group_export_name(self.document)
+            target_subdir, json_name = active_group_export_name(self.document)
         except SpineExportError as exc:
             QMessageBox.critical(self, "Spine export failed", str(exc))
             return
@@ -138,9 +138,9 @@ class SpineExportDialog(QDialog):
             )
             return
 
-        target_dir = os.path.join(export_dir, name)
+        target_dir = os.path.join(export_dir, target_subdir)
         settings = ExportSettings(
-            json_path=os.path.join(target_dir, name + ".json"),
+            json_path=os.path.join(target_dir, json_name + ".json"),
             images_dir=os.path.join(target_dir, "images"),
             scale=self.scale.value() / 100.0,
             padding=self.padding.value(),

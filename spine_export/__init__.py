@@ -12,7 +12,7 @@ class KritaSpineExtension(Extension):
 
     def createActions(self, window):
         action = window.createAction(
-            "krita_spine_export",
+            "spine_export",
             "Export to Spine...",
             "tools/scripts",
         )
@@ -22,7 +22,9 @@ class KritaSpineExtension(Extension):
         app = Krita.instance()
         document = app.activeDocument()
         if document is None:
-            app.activeWindow().qwindow().showMessage("Open a document before exporting to Spine.")
+            app.activeWindow().qwindow().showMessage(
+                "Open a document before exporting to Spine."
+            )
             return
         dialog = SpineExportDialog(document, app.activeWindow().qwindow())
         dialog.exec_()

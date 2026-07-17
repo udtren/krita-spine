@@ -89,8 +89,10 @@ def active_group_export_name(document):
     if parent is not None and parent.type() == "grouplayer":
         parent_name = _clean_node_name(parent.name())
     if parent_name:
-        return "{0}_{1}".format(parent_name, current)
-    return current
+        target_dir = os.path.join(parent_name, current)
+    else:
+        target_dir = current
+    return target_dir, current
 
 
 @dataclass

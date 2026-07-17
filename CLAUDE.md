@@ -11,10 +11,10 @@ attachments plus Spine JSON, modeled after Esoteric Software's
 ## Repository Layout
 
 ```
-krita_spine.desktop      # Krita plugin descriptor
+spine_export.desktop     # Krita plugin descriptor
 README.md                # User-facing documentation
 CHANGELOG.md             # Release history
-krita_spine/
+spine_export/
     __init__.py          # Extension entry point; registers the Tools menu action
     dialog.py            # Qt export dialog (PyQt5/PySide6)
     exporter.py          # Core export logic (layer collection, JSON, PNG output)

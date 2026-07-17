@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Service
 ServiceTypes=Krita/PythonPlugin
-X-KDE-Library=krita_spine
+X-KDE-Library=spine_export
 X-Python-2-Compatible=false
 X-Krita-Manual=README.md
-Name=Krita Spine Export
+Name=Spine Export
 Comment=Export Krita layers as PNG attachments and Spine JSON
