@@ -4,7 +4,18 @@ Krita Spine Export is a Krita Python plugin that exports document layers as PNG 
 
 ## Usage
 
-Open a Krita document and run **Tools > Scripts > Export to Spine...**. Choose the JSON path, image output folder, scale, padding, and export options, then press **Export**.
+Select a **group layer** as the active node, then run **Tools > Scripts > Export to Spine...**. Choose an **export folder**, scale, padding, and export options, then press **Export**.
+
+The active group layer determines the export name:
+
+- The name is `parentGroupName_activeGroupName` (layer tags are stripped). If the active group has no group parent, only the active group name is used.
+- A subfolder named after this combined name is created inside the export folder.
+- The Spine JSON is written into that subfolder as `<combined name>.json`.
+- Images are written into an `images` folder inside that subfolder.
+
+If the active node is not a group layer, the export is cancelled and you are asked to change the active node.
+
+Only **visible** layers are exported. Hidden layers, and layers inside hidden groups, are always ignored.
 
 The exporter writes:
 

@@ -31,7 +31,12 @@ except ImportError:  # Krita 6 may expose PySide6 in some builds.
         QVBoxLayout,
     )
 
-from .exporter import ExportSettings, SpineExporter, SpineExportError
+from .exporter import (
+    ExportSettings,
+    SpineExporter,
+    SpineExportError,
+    active_group_export_name,
+)
 
 
 class SpineExportDialog(QDialog):
@@ -48,31 +53,18 @@ class SpineExportDialog(QDialog):
             return os.path.dirname(filename)
         return os.path.expanduser("~")
 
-    def _default_json_path(self):
-        filename = self.document.fileName() or self.document.name() or "krita-spine"
-        stem = os.path.splitext(os.path.basename(filename))[0] or "krita-spine"
-        return os.path.join(self._default_base_dir(), stem + ".json")
-
     def _build_ui(self):
         root = QVBoxLayout(self)
 
         form = QFormLayout()
-        self.json_path = QLineEdit(self._default_json_path())
-        self.images_dir = QLineEdit(os.path.join(self._default_base_dir(), "images"))
+        self.export_dir = QLineEdit(self._default_base_dir())
 
-        json_row = QHBoxLayout()
-        json_row.addWidget(self.json_path)
-        json_btn = QPushButton("Browse")
-        json_btn.clicked.connect(self._browse_json)
-        json_row.addWidget(json_btn)
-        form.addRow("Spine JSON", json_row)
-
-        image_row = QHBoxLayout()
-        image_row.addWidget(self.images_dir)
-        image_btn = QPushButton("Browse")
-        image_btn.clicked.connect(self._browse_images)
-        image_row.addWidget(image_btn)
-        form.addRow("Images folder", image_row)
+        export_row = QHBoxLayout()
+        export_row.addWidget(self.export_dir)
+        export_btn = QPushButton("Browse")
+        export_btn.clicked.connect(self._browse_export_dir)
+        export_row.addWidget(export_btn)
+        form.addRow("Export folder", export_row)
 
         self.scale = QSpinBox()
         self.scale.setRange(1, 1000)
@@ -90,8 +82,6 @@ class SpineExportDialog(QDialog):
 
         self.trim_whitespace = QCheckBox("Trim whitespace")
         self.trim_whitespace.setChecked(True)
-        self.ignore_hidden = QCheckBox("Ignore hidden layers")
-        self.ignore_hidden.setChecked(False)
         self.write_json = QCheckBox("Write Spine JSON")
         self.write_json.setChecked(True)
         self.write_images = QCheckBox("Write PNG images")
@@ -103,7 +93,6 @@ class SpineExportDialog(QDialog):
 
         for widget in (
             self.trim_whitespace,
-            self.ignore_hidden,
             self.write_json,
             self.write_images,
             self.write_template,
@@ -128,28 +117,34 @@ class SpineExportDialog(QDialog):
         buttons.addWidget(export_btn)
         root.addLayout(buttons)
 
-    def _browse_json(self):
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Spine JSON", self.json_path.text(), "Spine JSON (*.json)"
-        )
-        if path:
-            self.json_path.setText(path)
-
-    def _browse_images(self):
+    def _browse_export_dir(self):
         path = QFileDialog.getExistingDirectory(
-            self, "Images folder", self.images_dir.text()
+            self, "Export folder", self.export_dir.text()
         )
         if path:
-            self.images_dir.setText(path)
+            self.export_dir.setText(path)
 
     def _export(self):
+        try:
+            name = active_group_export_name(self.document)
+        except SpineExportError as exc:
+            QMessageBox.critical(self, "Spine export failed", str(exc))
+            return
+
+        export_dir = self.export_dir.text().strip()
+        if not export_dir:
+            QMessageBox.critical(
+                self, "Spine export failed", "Choose an export folder."
+            )
+            return
+
+        target_dir = os.path.join(export_dir, name)
         settings = ExportSettings(
-            json_path=self.json_path.text().strip(),
-            images_dir=self.images_dir.text().strip(),
+            json_path=os.path.join(target_dir, name + ".json"),
+            images_dir=os.path.join(target_dir, "images"),
             scale=self.scale.value() / 100.0,
             padding=self.padding.value(),
             trim_whitespace=self.trim_whitespace.isChecked(),
-            ignore_hidden_layers=self.ignore_hidden.isChecked(),
             write_json=self.write_json.isChecked(),
             write_images=self.write_images.isChecked(),
             write_template=self.write_template.isChecked(),

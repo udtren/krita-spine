@@ -72,6 +72,27 @@ class SpineExportError(Exception):
     pass
 
 
+def _clean_node_name(name):
+    return _TAG_RE.sub("", name or "").strip()
+
+
+def active_group_export_name(document):
+    node = document.activeNode()
+    if node is None or node.type() != "grouplayer":
+        raise SpineExportError(
+            "The active node is not a group layer. Select a group layer as the "
+            "active node before exporting."
+        )
+    current = _clean_node_name(node.name())
+    parent = node.parentNode()
+    parent_name = ""
+    if parent is not None and parent.type() == "grouplayer":
+        parent_name = _clean_node_name(parent.name())
+    if parent_name:
+        return "{0}_{1}".format(parent_name, current)
+    return current
+
+
 @dataclass
 class ExportSettings:
     json_path: str
@@ -79,7 +100,6 @@ class ExportSettings:
     scale: float = 1.0
     padding: int = 1
     trim_whitespace: bool = True
-    ignore_hidden_layers: bool = False
     write_json: bool = True
     write_images: bool = True
     write_template: bool = False
@@ -154,6 +174,8 @@ class SpineExporter:
         if self.settings.write_images and not self.settings.images_dir:
             raise SpineExportError("Choose an images output folder.")
 
+        active_group_export_name(self.document)
+
         self.document.waitForDone()
         self.document.refreshProjection()
 
@@ -197,9 +219,7 @@ class SpineExporter:
         node_type = node.type()
         if self._has_tag(node, "ignore"):
             return
-        if self.settings.ignore_hidden_layers and not self._effective_visible(
-            node, parents
-        ):
+        if not self._effective_visible(node, parents):
             return
         if node_type in (
             "transparencymask",
