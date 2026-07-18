@@ -1,6 +1,6 @@
 ﻿import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 try:
     from PyQt5.QtCore import QRect
@@ -57,6 +57,8 @@ class SpineExporter:
         self.document = document
         self.settings = settings
         self.layers: List[LayerInfo] = []
+        self.root_marker: Optional[LayerInfo] = None
+        self.root_origin: Tuple[float, float] = (0.0, 0.0)
         self.bones: Dict[str, BoneInfo] = {"root": BoneInfo("root")}
         self.slots: Dict[str, SlotInfo] = {}
         self.skin_order: List[str] = []
@@ -79,7 +81,9 @@ class SpineExporter:
         self.document.waitForDone()
         self.document.refreshProjection()
 
+        self._collect_root_marker()
         self._collect_layers()
+        self._set_root_origin()
         if not self.layers:
             raise SpineExportError("No exportable layers found.")
 
@@ -108,6 +112,23 @@ class SpineExporter:
             json_path=self.settings.json_path if self.settings.write_json else None,
             images_dir=self.settings.images_dir if self.settings.write_images else None,
         )
+
+    def _collect_root_marker(self):
+        root = self.document.rootNode()
+        if root is None:
+            return
+        for node in root.childNodes():
+            self._walk_root_marker(node, [])
+
+    def _walk_root_marker(self, node, parents: List[object]):
+        name = node.name()
+        node_type = node.type()
+        if node_type != "grouplayer" and strip_tags(name) == "_root_":
+            self._set_root_marker(node, parents, name)
+            return
+        if node_type == "grouplayer":
+            for child in node.childNodes():
+                self._walk_root_marker(child, parents + [node])
 
     def _collect_layers(self):
         group = self.document.activeNode()
@@ -163,6 +184,43 @@ class SpineExporter:
                     visible=node.visible(),
                 )
             )
+
+    def _set_root_marker(self, node, parents: List[object], name: str):
+        if self.root_marker is not None:
+            raise SpineExportError(
+                "Multiple _root_ marker layers found: {0} and {1}".format(
+                    layer_path(self.root_marker),
+                    "/".join([parent.name() for parent in parents] + [name]),
+                )
+            )
+        self.root_marker = LayerInfo(
+            node=node,
+            parent_chain=list(parents),
+            name=name,
+            clean_name=strip_tags(name),
+            visible=node.visible(),
+        )
+
+    def _set_root_origin(self):
+        if self.root_marker is None:
+            return
+        rect = self.root_marker.node.bounds()
+        if rect is None or rect.width() <= 0 or rect.height() <= 0:
+            raise SpineExportError(
+                "Root marker layer has no visible pixels: {0}".format(
+                    layer_path(self.root_marker)
+                )
+            )
+        center_x = rect.x() + rect.width() / 2.0
+        center_y = rect.y() + rect.height() / 2.0
+        self.root_origin = (
+            center_x * self.settings.scale,
+            (self.document.height() - center_y) * self.settings.scale,
+        )
+
+    def _apply_root_origin(self, x: float, y: float):
+        origin_x, origin_y = self.root_origin
+        return x - origin_x, y - origin_y
 
     def _prepare_layers(self):
         for layer in self.layers:
@@ -233,10 +291,9 @@ class SpineExporter:
             )
             center_x = layer.rect.x() + layer.rect.width() / 2.0
             center_y = layer.rect.y() + layer.rect.height() / 2.0
-            layer.spine_xy = (
-                center_x * self.settings.scale,
-                (self.document.height() - center_y) * self.settings.scale,
-            )
+            x = center_x * self.settings.scale
+            y = (self.document.height() - center_y) * self.settings.scale
+            layer.spine_xy = self._apply_root_origin(x, y)
             self._register_bone(layer)
             self._register_slot(layer)
             if layer.skin_name not in self.skin_order:
@@ -256,10 +313,11 @@ class SpineExporter:
             self.bones[layer.bone_name] = bone
         rect = layer.rect
         if rect is not None and not bone.has_position:
-            bone.x = (rect.x() + rect.width() / 2.0) * self.settings.scale
-            bone.y = (
+            x = (rect.x() + rect.width() / 2.0) * self.settings.scale
+            y = (
                 self.document.height() - (rect.y() + rect.height() / 2.0)
             ) * self.settings.scale
+            bone.x, bone.y = self._apply_root_origin(x, y)
             bone.has_position = True
 
     def _register_slot(self, layer: LayerInfo):

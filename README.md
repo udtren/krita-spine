@@ -24,6 +24,12 @@ The exporter writes:
 - Spine JSON with `bones`, `slots`, `skins`, and an empty animation.
 - Optional `template.png` from the current document projection.
 
+## Root Marker
+
+A layer named `_root_` anywhere in the document can be used as an origin marker. The marker layer is not exported as a PNG or attachment. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
+
+Use a single visible dot on the `_root_` layer for the clearest result. If more than one `_root_` marker layer exists, export is cancelled.
+
 ## Supported Tags
 
 Tags can be placed in layer or group names using the same square-bracket style as PhotoshopToSpine.

@@ -48,6 +48,9 @@ spine_export/
 - `tags.py` owns layer/group name tag parsing and name derivation. This includes
   `[folder]`, `[skin]`, `[bone]`, `[slot]`, `[path]`, `[scale]`, `[trim]`,
   `[name]`, and the parent-prefixed attachment name rule.
+- A non-group layer named `_root_` anywhere in the document is reserved as a
+  non-exported origin marker;
+  its visible center becomes Spine `0,0` for attachment and bone positions.
 - `image_writer.py` owns PNG output, template output, `InfoObject` configuration,
   and the `QImage` fast path for RGBA/U8 layer projections.
 - `_collect_layers` starts from the active group layer (not the document root)

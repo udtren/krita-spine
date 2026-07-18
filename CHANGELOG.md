@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2026-07-18
 
 ### Changed
+- Layers named `_root_` anywhere in the document are now treated as non-exported
+  origin markers; their
+  visible center becomes Spine `0,0` for exported attachment and bone positions.
 - Split exporter internals into `models.py`, `tags.py`, and `image_writer.py`
   while keeping the existing exporter API available.
 - Exported image and attachment names now include the immediate parent group
