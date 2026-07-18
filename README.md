@@ -8,17 +8,17 @@ Select a **group layer** as the active node, then run **Tools > Scripts > Export
 
 The active group layer determines the export location:
 
-- A `parentGroupName` folder is created inside the export folder, and an `activeGroupName` folder is created inside it (layer tags are stripped). If the active group has no group parent, only the `activeGroupName` folder is created inside the export folder.
+- An `activeGroupName` folder is created inside the export folder (layer tags are stripped).
 - The Spine JSON is written into the `activeGroupName` folder as `activeGroupName.json`.
 - Images are written into an `images` folder inside the `activeGroupName` folder.
 
 If the active node is not a group layer, the export is cancelled and you are asked to change the active node.
 
-Only **visible** layers are exported. Hidden layers, and layers inside hidden groups, are always ignored.
+All layers inside the active group layer are exported, **both visible and hidden**.
 
 The exporter writes:
 
-- PNG files for exportable layers and `[merge]` groups.
+- PNG files for exportable layers and `[merge]` groups. By default, each image and attachment name is prefixed with its immediate parent group name, for example `front_head.png`.
 - Spine JSON with `bones`, `slots`, `skins`, and an empty animation.
 - Optional `template.png` from the current document projection.
 

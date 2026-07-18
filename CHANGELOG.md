@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Export now creates a nested `parentGroupName/activeGroupName` folder structure
-  inside the export folder instead of a single `parentGroupName_activeGroupName`
-  folder. The Spine JSON is written as `activeGroupName.json`.
+- Exported image and attachment names now include the immediate parent group
+  name as a prefix, for example `front_head.png`.
+- Export now processes only the layers inside the **active group layer**, and
+  both visible and hidden layers within it are exported.
+- The export folder and Spine JSON are named after the active group layer
+  (`activeGroupName/activeGroupName.json`) instead of a nested
+  `parentGroupName/activeGroupName` structure.
 
 ## [1.0.0] - 2026-07-17
 

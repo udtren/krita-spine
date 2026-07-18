@@ -84,15 +84,7 @@ def active_group_export_name(document):
             "active node before exporting."
         )
     current = _clean_node_name(node.name())
-    parent = node.parentNode()
-    parent_name = ""
-    if parent is not None and parent.type() == "grouplayer":
-        parent_name = _clean_node_name(parent.name())
-    if parent_name:
-        target_dir = os.path.join(parent_name, current)
-    else:
-        target_dir = current
-    return target_dir, current
+    return current, current
 
 
 @dataclass
@@ -212,16 +204,19 @@ class SpineExporter:
         )
 
     def _collect_layers(self):
-        root = self.document.rootNode()
-        for node in root.childNodes():
+        group = self.document.activeNode()
+        if group is None or group.type() != "grouplayer":
+            raise SpineExportError(
+                "The active node is not a group layer. Select a group layer as the "
+                "active node before exporting."
+            )
+        for node in group.childNodes():
             self._walk_node(node, [])
 
     def _walk_node(self, node, parents: List[object]):
         name = node.name()
         node_type = node.type()
         if self._has_tag(node, "ignore"):
-            return
-        if not self._effective_visible(node, parents):
             return
         if node_type in (
             "transparencymask",
@@ -276,12 +271,15 @@ class SpineExporter:
                     )
                 )
 
+            export_name = self._parent_prefixed_name(clean, layer.parent_chain)
             folder_path = self._folder_path(layer.parent_chain + [layer.node])
             path_tag = self._tag_value(
                 layer.node, "path", include_parents=layer.parent_chain
             )
             layer.attachment_name = (
-                clean if clean.startswith("/") else folder_path + clean
+                export_name
+                if export_name.startswith("/")
+                else folder_path + export_name
             )
             layer.attachment_name = layer.attachment_name.lstrip("/")
             if path_tag:
@@ -305,10 +303,9 @@ class SpineExporter:
                 ]
             else:
                 layer.placeholder_name = layer.attachment_name
-            layer.slot_name = (
-                self._tag_value(layer.node, "slot", include_parents=layer.parent_chain)
-                or clean
-            )
+            layer.slot_name = self._tag_value(
+                layer.node, "slot", include_parents=layer.parent_chain
+            ) or export_name.lstrip("/")
             layer.bone_name = self._bone_name(layer.parent_chain + [layer.node])
             layer.scale = self._float_tag(layer, "scale", 1.0)
             layer.mesh = self._tag_value(
@@ -585,11 +582,6 @@ class SpineExporter:
         except Exception:
             return False
 
-    def _effective_visible(self, node, parents):
-        if not node.visible():
-            return False
-        return all(parent.visible() for parent in parents)
-
     def _tags(self, name: str):
         return [
             (m.group(1).lower(), (m.group(2) or "").strip())
@@ -644,6 +636,14 @@ class SpineExporter:
                     )
                 result = pattern.replace("*", result)
         return result
+
+    def _parent_prefixed_name(self, name: str, parents: List[object]):
+        if name.startswith("/") or not parents:
+            return name
+        parent_name = self._strip_tags(parents[-1].name())
+        if not parent_name:
+            return name
+        return parent_name + "_" + name
 
     def _folder_path(self, nodes: List[object]):
         parts = []
