@@ -35,7 +35,7 @@ from .exporter import (
     ExportSettings,
     SpineExporter,
     SpineExportError,
-    active_group_export_name,
+    document_export_name,
 )
 
 
@@ -126,7 +126,7 @@ class SpineExportDialog(QDialog):
 
     def _export(self):
         try:
-            target_subdir, json_name = active_group_export_name(self.document)
+            target_subdir, json_name = document_export_name(self.document)
         except SpineExportError as exc:
             QMessageBox.critical(self, "Spine export failed", str(exc))
             return

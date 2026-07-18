@@ -37,24 +37,26 @@ spine_export/
 - `__init__.py` registers `KritaSpineExtension` and adds the
   "Export to Spine..." action under Tools > Scripts, opening `SpineExportDialog`.
 - `dialog.py` (`SpineExportDialog`) collects an **export folder** and options,
-  derives the export name via `active_group_export_name`, and constructs
-  `ExportSettings` before running `SpineExporter`.
-- `exporter.py` contains `active_group_export_name(document)` and
-  `SpineExporter`. It validates the active group layer, walks the children of
-  the active group layer, prepares `LayerInfo` records, coordinates image output,
-  and writes Spine JSON.
+  derives the export name from the Krita document file name via
+  `document_export_name`, and constructs `ExportSettings` before running
+  `SpineExporter`.
+- `exporter.py` contains `document_export_name(document)` and `SpineExporter`.
+  It validates the saved Krita file name, walks exportable layers from the
+  document root, prepares `LayerInfo` records, coordinates image output, and
+  writes Spine JSON.
 - `models.py` owns the shared dataclasses: `ExportSettings`, `ExportResult`,
   `LayerInfo`, `BoneInfo`, and `SlotInfo`, plus `SpineExportError`.
 - `tags.py` owns layer/group name tag parsing and name derivation. This includes
   `[folder]`, `[skin]`, `[bone]`, `[slot]`, `[path]`, `[scale]`, `[trim]`,
   `[name]`, and the parent-prefixed attachment name rule.
 - A non-group layer named `_root_` anywhere in the document is reserved as a
-  non-exported origin marker;
-  its visible center becomes Spine `0,0` for attachment and bone positions.
+  non-exported origin marker. Its visible center becomes Spine `0,0` for
+  attachment and bone positions.
 - `image_writer.py` owns PNG output, template output, `InfoObject` configuration,
   and the `QImage` fast path for RGBA/U8 layer projections.
-- `_collect_layers` starts from the active group layer (not the document root)
-  and exports all layers inside it, both visible and hidden.
+- `_collect_layers` starts from the document root and exports both visible and
+  hidden layers. Root-level groups and layers whose names start with `_` are
+  skipped, except that `_root_` is still read by the separate root marker pass.
 
 ## Conventions
 

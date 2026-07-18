@@ -41,15 +41,18 @@ _BLEND_MAP = {
 }
 
 
+def document_export_name(document):
+    filename = document.fileName() or ""
+    if not filename:
+        raise SpineExportError("Save the Krita document before exporting to Spine.")
+    name = clean_node_name(os.path.splitext(os.path.basename(filename))[0])
+    if not name:
+        raise SpineExportError("The Krita document file name is not a valid export name.")
+    return name, name
+
+
 def active_group_export_name(document):
-    node = document.activeNode()
-    if node is None or node.type() != "grouplayer":
-        raise SpineExportError(
-            "The active node is not a group layer. Select a group layer as the "
-            "active node before exporting."
-        )
-    current = clean_node_name(node.name())
-    return current, current
+    return document_export_name(document)
 
 
 class SpineExporter:
@@ -76,7 +79,7 @@ class SpineExporter:
         if self.settings.write_images and not self.settings.images_dir:
             raise SpineExportError("Choose an images output folder.")
 
-        active_group_export_name(self.document)
+        document_export_name(self.document)
 
         self.document.waitForDone()
         self.document.refreshProjection()
@@ -131,14 +134,16 @@ class SpineExporter:
                 self._walk_root_marker(child, parents + [node])
 
     def _collect_layers(self):
-        group = self.document.activeNode()
-        if group is None or group.type() != "grouplayer":
-            raise SpineExportError(
-                "The active node is not a group layer. Select a group layer as the "
-                "active node before exporting."
-            )
-        for node in group.childNodes():
+        root = self.document.rootNode()
+        if root is None:
+            raise SpineExportError("The Krita document has no root node.")
+        for node in root.childNodes():
+            if self._is_ignored_root_node(node):
+                continue
             self._walk_node(node, [])
+
+    def _is_ignored_root_node(self, node):
+        return (node.name() or "").startswith("_")
 
     def _walk_node(self, node, parents: List[object]):
         name = node.name()
@@ -154,6 +159,8 @@ class SpineExporter:
         ):
             return
         if has_tag(node, "overlay"):
+            return
+        if node_type != "grouplayer" and strip_tags(name) == "_root_":
             return
 
         is_group = node_type == "grouplayer"

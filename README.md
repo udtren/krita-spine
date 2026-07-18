@@ -6,17 +6,15 @@ Krita Spine Export is a Krita Python plugin that exports document layers as PNG 
 
 ## Usage
 
-Select a **group layer** as the active node, then run **Tools > Scripts > Export to Spine...**. Choose an **export folder**, scale, padding, and export options, then press **Export**.
+Save the Krita document, then run **Tools > Scripts > Export to Spine...**. Choose an **export folder**, scale, padding, and export options, then press **Export**.
 
-The active group layer determines the export location:
+The Krita file name determines the export location:
 
-- An `activeGroupName` folder is created inside the export folder (layer tags are stripped).
-- The Spine JSON is written into the `activeGroupName` folder as `activeGroupName.json`.
-- Images are written into an `images` folder inside the `activeGroupName` folder.
+- A `kritaFileName` folder is created inside the export folder (without the file extension).
+- The Spine JSON is written into the `kritaFileName` folder as `kritaFileName.json`.
+- Images are written into an `images` folder inside the `kritaFileName` folder.
 
-If the active node is not a group layer, the export is cancelled and you are asked to change the active node.
-
-All layers inside the active group layer are exported, **both visible and hidden**.
+All exportable layers under the document root are exported, **both visible and hidden**. Root-level groups and layers whose names start with `_` are skipped, except that `_root_` can still be used as the origin marker.
 
 The exporter writes:
 
@@ -26,7 +24,7 @@ The exporter writes:
 
 ## Root Marker
 
-A layer named `_root_` anywhere in the document can be used as an origin marker. The marker layer is not exported as a PNG or attachment. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
+A layer named `_root_` anywhere in the document can be used as an origin marker, even when it is outside the exported layer groups. The marker layer is not exported as a PNG or attachment. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
 
 Use a single visible dot on the `_root_` layer for the clearest result. If more than one `_root_` marker layer exists, export is cancelled.
 

@@ -9,17 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Layers named `_root_` anywhere in the document are now treated as non-exported
-  origin markers; their
-  visible center becomes Spine `0,0` for exported attachment and bone positions.
+  origin markers. Their visible center becomes Spine `0,0` for exported
+  attachment and bone positions.
 - Split exporter internals into `models.py`, `tags.py`, and `image_writer.py`
   while keeping the existing exporter API available.
 - Exported image and attachment names now include the immediate parent group
   name as a prefix, for example `front_head.png`.
-- Export now processes only the layers inside the **active group layer**, and
-  both visible and hidden layers within it are exported.
-- The export folder and Spine JSON are named after the active group layer
-  (`activeGroupName/activeGroupName.json`) instead of a nested
-  `parentGroupName/activeGroupName` structure.
+- Export now processes layers from the document root instead of the active group
+  layer. Root-level groups and layers whose names start with `_` are skipped.
+- The export folder and Spine JSON are named after the Krita file name
+  (`kritaFileName/kritaFileName.json`).
 
 ## [1.0.0] - 2026-07-17
 
