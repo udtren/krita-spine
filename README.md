@@ -24,7 +24,7 @@ The exporter writes:
 
 ## Root Marker
 
-A layer named `_root_` anywhere in the document can be used as an origin marker, even when it is outside the exported layer groups. The marker layer is not exported as a PNG or attachment. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
+A layer named `_root_` anywhere in the document can be used as an origin marker. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
 
 Use a single visible dot on the `_root_` layer for the clearest result. If more than one `_root_` marker layer exists, export is cancelled.
 
