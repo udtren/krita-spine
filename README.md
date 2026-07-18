@@ -1,6 +1,6 @@
 ﻿# Krita Spine Export
 
-Krita Spine Export is a Krita Python plugin that exports document layers as PNG attachments plus Spine JSON, modeled after Esoteric Software's `PhotoshopToSpine.jsx` workflow.
+Krita Spine Export is a Krita Python plugin that exports document layers as PNG attachments plus Spine JSON.
 
 ## Usage
 
@@ -37,9 +37,3 @@ Tags can be placed in layer or group names using the same square-bracket style a
 - `[merge]` on groups
 - `[name:pattern]` on groups, where `pattern` contains `*`
 - `[path:name]` on layers or merged groups
-
-## Notes
-
-Krita's Python API is not Photoshop's layer compositor, so this version intentionally focuses on reliable layer projection export. It does not reproduce Photoshop-specific adjustment-layer, clipping-mask, mask-bound, selection-only, ruler-origin, or overlay behavior exactly. Krita group projections and layer bounds are used where available.
-
-For non-RGBA/U8 layers, the exporter falls back to Krita's native node PNG save. For RGBA/U8 layers, it writes PNGs via `projectionPixelData` so padding and scale are applied consistently.

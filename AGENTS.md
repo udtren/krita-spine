@@ -17,7 +17,10 @@ CHANGELOG.md             # Release history
 spine_export/
     __init__.py          # Extension entry point; registers the Tools menu action
     dialog.py            # Qt export dialog (PyQt5/PySide6)
-    exporter.py          # Core export logic (layer collection, JSON, PNG output)
+    exporter.py          # Export orchestration, layer collection/preparation, JSON output
+    models.py            # Shared dataclasses and SpineExportError
+    tags.py              # Layer/group tag parsing and naming helpers
+    image_writer.py      # PNG/template image writing and Qt image helpers
 ```
 
 ## Runtime & Environment
@@ -36,17 +39,19 @@ spine_export/
 - `dialog.py` (`SpineExportDialog`) collects an **export folder** and options,
   derives the export name via `active_group_export_name`, and constructs
   `ExportSettings` before running `SpineExporter`.
-- `exporter.py` contains:
-  - `active_group_export_name(document)` — validates the active node is a group
-    layer and returns its cleaned name (tags stripped) for both the output
-    folder and JSON file name.
-  - `ExportSettings` / `ExportResult` dataclasses.
-  - `SpineExporter` — walks the children of the active group layer, prepares
-    layers, writes PNGs and JSON.
-  - `_collect_layers` — starts from the active group layer (not the document
-    root) and exports all layers inside it, both visible and hidden.
-- Layer/group name tags (e.g. `[bone]`, `[slot]`, `[skin]`, `[merge]`,
-  `[ignore]`) are parsed with `_TAG_RE`. See README for the full tag list.
+- `exporter.py` contains `active_group_export_name(document)` and
+  `SpineExporter`. It validates the active group layer, walks the children of
+  the active group layer, prepares `LayerInfo` records, coordinates image output,
+  and writes Spine JSON.
+- `models.py` owns the shared dataclasses: `ExportSettings`, `ExportResult`,
+  `LayerInfo`, `BoneInfo`, and `SlotInfo`, plus `SpineExportError`.
+- `tags.py` owns layer/group name tag parsing and name derivation. This includes
+  `[folder]`, `[skin]`, `[bone]`, `[slot]`, `[path]`, `[scale]`, `[trim]`,
+  `[name]`, and the parent-prefixed attachment name rule.
+- `image_writer.py` owns PNG output, template output, `InfoObject` configuration,
+  and the `QImage` fast path for RGBA/U8 layer projections.
+- `_collect_layers` starts from the active group layer (not the document root)
+  and exports all layers inside it, both visible and hidden.
 
 ## Conventions
 
