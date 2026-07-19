@@ -13,6 +13,7 @@ class ExportSettings:
     scale: float = 1.0
     padding: int = 1
     trim_whitespace: bool = True
+    ignore_hidden_layers: bool = False
     write_json: bool = True
     write_images: bool = True
     write_template: bool = False

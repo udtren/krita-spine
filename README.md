@@ -1,6 +1,6 @@
 ﻿# Krita Spine Export
 
-Krita Spine Export is a Krita Python plugin that exports document layers as PNG attachments plus Spine JSON.
+Krita Spine Export is a Krita Python plugin that exports document layers as PNG attachments plus Spine JSON, modeled after Esoteric Software's [PhotoshopToSpine.jsx](https://github.com/EsotericSoftware/spine-scripts/tree/master/photoshop) workflow.
 
 ![Krita Spine Export](images/1.png)
 
@@ -14,7 +14,7 @@ The Krita file name determines the export location:
 - The Spine JSON is written into the `kritaFileName` folder as `kritaFileName.json`.
 - Images are written into an `images` folder inside the `kritaFileName` folder.
 
-All exportable layers under the document root are exported, **both visible and hidden**. Root-level groups and layers whose names start with `_` are skipped, except that `_root_` can still be used as the origin marker.
+All exportable layers under the document root are exported, **both visible and hidden** by default. Enable **Ignore hidden layers** to skip hidden groups, hidden layers, and everything inside hidden groups. Root-level groups and layers whose names start with `_` are skipped, except that `_root_` can still be used as the origin marker.
 
 The exporter writes:
 
@@ -24,9 +24,9 @@ The exporter writes:
 
 ## Root Marker
 
-A layer named `_root_` anywhere in the document can be used as an origin marker. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
+![_root__](images/2.png)
 
-Use a single visible dot on the `_root_` layer for the clearest result. If more than one `_root_` marker layer exists, export is cancelled.
+A layer named `_root_` anywhere in the document can be used as an origin marker. Its visible pixel bounds are used to find the marker center, and that point becomes Spine `0,0`; all exported attachment and bone positions are offset relative to it.
 
 ## Supported Tags
 

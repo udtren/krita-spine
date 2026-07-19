@@ -55,8 +55,11 @@ spine_export/
 - `image_writer.py` owns PNG output, template output, `InfoObject` configuration,
   and the `QImage` fast path for RGBA/U8 layer projections.
 - `_collect_layers` starts from the document root and exports both visible and
-  hidden layers. Root-level groups and layers whose names start with `_` are
-  skipped, except that `_root_` is still read by the separate root marker pass.
+  hidden layers by default. When `ExportSettings.ignore_hidden_layers` is true,
+  hidden groups, hidden layers, and children of hidden groups are skipped.
+  Root-level groups and layers whose names start with `_` are skipped, except
+  that `_root_` is still read by the separate root marker pass when visible or
+  when hidden layers are not being ignored.
 
 ## Conventions
 

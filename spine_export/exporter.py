@@ -124,6 +124,8 @@ class SpineExporter:
             self._walk_root_marker(node, [])
 
     def _walk_root_marker(self, node, parents: List[object]):
+        if self._should_ignore_hidden(node):
+            return
         name = node.name()
         node_type = node.type()
         if node_type != "grouplayer" and strip_tags(name) == "_root_":
@@ -145,9 +147,14 @@ class SpineExporter:
     def _is_ignored_root_node(self, node):
         return (node.name() or "").startswith("_")
 
+    def _should_ignore_hidden(self, node):
+        return self.settings.ignore_hidden_layers and not node.visible()
+
     def _walk_node(self, node, parents: List[object]):
         name = node.name()
         node_type = node.type()
+        if self._should_ignore_hidden(node):
+            return
         if has_tag(node, "ignore"):
             return
         if node_type in (

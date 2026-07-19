@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2026-07-18
 
 ### Changed
+- Added an **Ignore hidden layers** export option, defaulting off, that skips
+  hidden groups, hidden layers, and children of hidden groups when enabled.
 - Layers named `_root_` anywhere in the document are now treated as non-exported
   origin markers. Their visible center becomes Spine `0,0` for exported
   attachment and bone positions.

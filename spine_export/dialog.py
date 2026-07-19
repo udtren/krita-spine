@@ -16,14 +16,12 @@ try:
         QVBoxLayout,
     )
 except ImportError:  # Krita 6 may expose PySide6 in some builds.
-    from PySide6.QtCore import Qt
     from PySide6.QtWidgets import (
         QCheckBox,
         QDialog,
         QFileDialog,
         QFormLayout,
         QHBoxLayout,
-        QLabel,
         QLineEdit,
         QMessageBox,
         QPushButton,
@@ -82,6 +80,8 @@ class SpineExportDialog(QDialog):
 
         self.trim_whitespace = QCheckBox("Trim whitespace")
         self.trim_whitespace.setChecked(True)
+        self.ignore_hidden_layers = QCheckBox("Ignore hidden layers")
+        self.ignore_hidden_layers.setChecked(False)
         self.write_json = QCheckBox("Write Spine JSON")
         self.write_json.setChecked(True)
         self.write_images = QCheckBox("Write PNG images")
@@ -93,6 +93,7 @@ class SpineExportDialog(QDialog):
 
         for widget in (
             self.trim_whitespace,
+            self.ignore_hidden_layers,
             self.write_json,
             self.write_images,
             self.write_template,
@@ -100,12 +101,12 @@ class SpineExportDialog(QDialog):
         ):
             root.addWidget(widget)
 
-        note = QLabel(
-            "Layer tags match PhotoshopToSpine where Krita exposes equivalent data."
-        )
-        note.setWordWrap(True)
-        note.setAlignment(Qt.AlignLeft)
-        root.addWidget(note)
+        # note = QLabel(
+        #     "Layer tags match PhotoshopToSpine where Krita exposes equivalent data."
+        # )
+        # note.setWordWrap(True)
+        # note.setAlignment(Qt.AlignLeft)
+        # root.addWidget(note)
 
         buttons = QHBoxLayout()
         buttons.addStretch()
@@ -145,6 +146,7 @@ class SpineExportDialog(QDialog):
             scale=self.scale.value() / 100.0,
             padding=self.padding.value(),
             trim_whitespace=self.trim_whitespace.isChecked(),
+            ignore_hidden_layers=self.ignore_hidden_layers.isChecked(),
             write_json=self.write_json.isChecked(),
             write_images=self.write_images.isChecked(),
             write_template=self.write_template.isChecked(),
